@@ -32,9 +32,9 @@ func itob(v int) []byte {
 }
 
 func run() error {
-	b, err := common.FileExists(dbname)
+	b := common.FileExists(dbname)
 	if b {
-		err = os.Remove(dbname)
+		err := os.Remove(dbname)
 		if err != nil {
 			return err
 		}
@@ -47,7 +47,12 @@ func run() error {
 		return err
 	}
 
-	defer db.Close()
+	defer func() {
+		err := db.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	err = db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucket([]byte("person"))
